@@ -1,72 +1,91 @@
-import { useState } from "react";
+import { useState } from 'react';
+import FlipMove from 'react-flip-move';
 import { connect } from 'react-redux';
-import { addBook } from "../redux/actions/actionAddBooks";
+import { addBook, deleteAllBooks, deleteBook } from '../redux/actions/actionAddBooks';
 
-function AddBooks({ libraryData, addBook }){
+const AddBooks = ({ libraryData, addBook, deleteBook, deleteAll }) => {
+
     const initialState = {
         title: '',
-        author:''
+        author: ''
     }
+
     const [newData, setNewData] = useState(initialState);
+
     const handleSubmit = e => {
         e.preventDefault();
-        addBook(newData);
-        //Vider le input
-        setNewData(initialState);
+        addBook(newData)
+        // Vider le input
+        setNewData(initialState)
     }
-    const displayData = libraryData.length > 0 ?
+
+    const displaydata = libraryData.length > 0 ?
+        <FlipMove>
+        {
             libraryData.map(data => {
                 return (
                     <li key={data.id} className="list-group-item list-group-item-light d-flex justify-content-between">
-                        <span><strong>Auteur: </strong>{data.author}</span>
-                        <span><strong>Titre: </strong>{data.title}</span>
+                        <span><strong>Titre: </strong> {data.title}</span>    
+                        <span><strong>Auteur: </strong> {data.author}</span>
+                        <span 
+                           className="btn btn-danger"
+                           onClick={() => deleteBook(data.id)}
+                        >x</span>
                     </li>
                 )
-            }) 
-        : <p className="text-center">Aucun livre à afficher</p>
+            })
+        }
+        </FlipMove>
+        : <p className="text-center">Aucune data à afficher</p>
+
+        const deleteAllBooksBtn = libraryData.length > 0 && 
+        <div className="d-flex justify-content-center">
+            <button 
+               className="btn btn-danger mt-4 mb-5"
+               onClick={() => deleteAll()}
+            >Effacer tous les livres</button>
+        </div>
+
     return (
         <main role="main">
             <div className="jumbotron jumbotron-fluid">
                 <div className="container text-center">
                     <h1 className="display-4">BOOKS</h1>
                     <p>Ajouter un livre à votre bibliothèque</p>
-                    <form className="d-flex flex-row align-items-center flex-wrap justify-content-center gap-3" onSubmit={handleSubmit}>
+                    <form className="d-flex flex-row align-items-center flex-wrap justify-content-center" onSubmit={handleSubmit}>
                         <div className="form-group">
                             <input 
-                                value={newData.title}
-                                type="text" 
-                                className="form-control" 
-                                placeholder="Titre" 
-                                required
-                                onChange={e => setNewData({...newData, title: e.target.value})}
+                               value={newData.title}
+                               type="text" 
+                               className="form-control" 
+                               placeholder="Titre"
+                               required
+                               onChange={ e => setNewData({...newData, title: e.target.value})}
                             />
                         </div>
                         <div className="form-group">
                             <input 
-                                value={newData.author}
-                                type="text" 
-                                className="form-control" 
-                                placeholder="Auteur" 
-                                required
-                                onChange={e => setNewData({...newData, author: e.target.value})}
+                               value={newData.author}
+                               type="text" 
+                               className="form-control ms-3" 
+                               placeholder="Auteur"
+                               required
+                               onChange={ e => setNewData({...newData, author: e.target.value})}
                             />
                         </div>
-                        <div className="form-group">
-                          <button className="btn btn-outline-secondary">Ajouter un livre</button>
+                        <div className="form-group ms-3">
+                            <button className="btn btn-outline-secondary ms-3">Ajouter un livre</button>
                         </div>
                     </form>
-
                 </div>
             </div>
             <div className="container mt-5" style={{minHeight: '200px'}}>
                 <div className="row">
                     <div className="col-md-12">
                         <ul className="list-group">
-                            {displayData}
+                            { displaydata }
                         </ul>
-                        <div className="d-flex justify-content-center">
-                            <button className="btn btn-danger mt-4 mb-5">Effacer tous les livres</button>
-                        </div>
+                        { deleteAllBooksBtn }
                     </div>
                 </div>
             </div>
@@ -74,16 +93,18 @@ function AddBooks({ libraryData, addBook }){
     )
 }
 
-const addStateToProps = state => {
+const mapStateToProps = state => {
     return {
         libraryData: state.library
     }
 }
 
-const addDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
     return {
-        addBook: param => dispatch(addBook(param))
+        addBook: param => dispatch(addBook(param)),
+        deleteBook: id => dispatch(deleteBook(id)),
+        deleteAll: () => dispatch(deleteAllBooks())
     }
 }
 
-export default connect(addStateToProps, addDispatchToProps)(AddBooks);
+export default connect(mapStateToProps, mapDispatchToProps)(AddBooks)
